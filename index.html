@@ -1,322 +1,157 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comprehensive Startup Command Center</title>
     <script src="//cdn.tailwindcss.com"></script>
     <link href="//fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="//unpkg.com/lucide@latest"></script>
     <script src="//cdn.jsdelivr.net/npm/apexcharts"></script>
-
-    <style>
-
-        :root {
-
-            --primary: #4f46e5;
-
-            --primary-light: #6366f1;
-
-            --background: #f8fafc;
-
-            --card-bg: #ffffff;
-
-            --text-primary: #1f2937;
-
-            --text-secondary: #6b7280;
-
-            --border-color: #e5e7eb;
-
-        }
-
-        body {
-
-            font-family: 'Inter', sans-serif;
-
-            background-color: var(--background);
-
-            color: var(--text-primary);
-
-        }
-
-        .tab {
-
-            transition: all 0.2s ease-in-out;
-
-            border-bottom: 3px solid transparent;
-
-        }
-
-        .tab-active {
-
-            color: var(--primary);
-
-            font-weight: 600;
-
-            border-bottom-color: var(--primary);
-
-        }
-
-        .tab-inactive { color: var(--text-secondary); }
-
-        .tab-inactive:hover { color: var(--primary); background-color: #f3f4f6; }
-
-        .card {
-
-            background-color: var(--card-bg);
-
-            border-radius: 0.75rem;
-
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-            overflow: hidden;
-
-            transition: transform 0.2s, box-shadow 0.2s;
-
-        }
-
-        .card:hover {
-
-            transform: translateY(-2px);
-
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-
-        }
-
-        .card-header {
-
-             background: linear-gradient(135deg, var(--primary), var(--primary-light));
-
-        }
-
-        .table-container { 
-
-            max-height: 280px; 
-
-            overflow-y: auto;
-
-        }
-
-        /* Styled Scrollbar */
-
-        .table-container::-webkit-scrollbar { width: 8px; }
-
-        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
-
-        .table-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-
-        .table-container::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-
-
-
-        th { background-color: #f9fafb; position: sticky; top: 0; z-index: 1; cursor: pointer; }
-
-        th:hover { background-color: #f3f4f6; }
-
-        .cell-content[contenteditable="true"]:focus {
-
-             outline: 2px solid var(--primary);
-
-             outline-offset: -2px;
-
-             background-color: #eef2ff;
-
-        }
-
-        .btn-primary { background-color: var(--primary); color: white; }
-
-        .btn-primary:hover { background-color: #4338ca; }
-
-        .btn-danger { background-color: #ef4444; color: white; }
-
-        .btn-danger:hover { background-color: #dc2626; }
-
-        .btn-secondary { background-color: #e5e7eb; color: #374151; }
-
-        .btn-secondary:hover { background-color: #d1d5db; }
-
-        .loading-overlay, .modal-overlay {
-
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-
-            background-color: rgba(249, 250, 251, 0.8);
-
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
-
-            backdrop-filter: blur(4px);
-
-            transition: opacity 0.2s;
-
-        }
-
-        .spinner {
-
-            border: 4px solid rgba(0, 0, 0, 0.1);
-
-            width: 36px; height: 36px; border-radius: 50%;
-
-            border-left-color: var(--primary);
-
-            animation: spin 1s ease infinite;
-
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .status-badge {
-
-            display: inline-block;
-
-            padding: 2px 10px;
-
-            border-radius: 9999px;
-
-            font-weight: 500;
-
-            font-size: 0.75rem;
-
-            text-transform: uppercase;
-
-        }
-
-        .progress-bar-bg { background-color: #e5e7eb; border-radius: 99px; }
-
-        .progress-bar { background: linear-gradient(to right, var(--primary-light), var(--primary)); height: 8px; border-radius: 99px; transition: width 0.3s ease; }
-
-        .apexcharts-legend-text { color: var(--text-primary) !important; }
-
-        .apexcharts-tooltip-title, .apexcharts-tooltip-text { color: #1f2937 !important; }
-
-        
-
-        /* Kanban Styles */
-
-        .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 1rem; }
-
-        .kanban-column { background-color: #f3f4f6; border-radius: 0.5rem; padding: 0.5rem; }
-
-        .kanban-column h4 { font-weight: 600; padding: 0.5rem; color: var(--text-secondary); }
-
-        .kanban-cards { min-height: 150px; }
-
-        .kanban-card { background-color: white; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); cursor: grab; }
-
-        .kanban-card:active { cursor: grabbing; }
-
-        .kanban-card p { font-size: 0.875rem; }
-
-        .kanban-card .notes { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;}
-
-        .kanban-placeholder { background-color: #e0e7ff; border: 2px dashed #a5b4fc; border-radius: 0.5rem; height: 50px; margin-bottom: 0.5rem;}
-
-    </style>
-
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+        .tab {
+            transition: all 0.2s ease-in-out;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-active {
+            color: var(--primary);
+            font-weight: 600;
+            border-bottom-color: var(--primary);
+        }
+        .tab-inactive { color: var(--text-secondary); }
+        .tab-inactive:hover { color: var(--primary); background-color: #f3f4f6; }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .card-header {
+             background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        }
+        .table-container { 
+            max-height: 280px; 
+            overflow-y: auto;
+        }
+        /* Styled Scrollbar */
+        .table-container::-webkit-scrollbar { width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .table-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        th { background-color: #f9fafb; position: sticky; top: 0; z-index: 1; cursor: pointer; }
+        th:hover { background-color: #f3f4f6; }
+        .cell-content[contenteditable="true"]:focus {
+             outline: 2px solid var(--primary);
+             outline-offset: -2px;
+             background-color: #eef2ff;
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: #4338ca; }
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-secondary { background-color: #e5e7eb; color: #374151; }
+        .btn-secondary:hover { background-color: #d1d5db; }
+        .loading-overlay, .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(249, 250, 251, 0.8);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.2s;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px; height: 36px; border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .progress-bar-bg { background-color: #e5e7eb; border-radius: 99px; }
+        .progress-bar { background: linear-gradient(to right, var(--primary-light), var(--primary)); height: 8px; border-radius: 99px; transition: width 0.3s ease; }
+        .apexcharts-legend-text { color: var(--text-primary) !important; }
+        .apexcharts-tooltip-title, .apexcharts-tooltip-text { color: #1f2937 !important; }
+        
+        /* Kanban Styles */
+        .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 1rem; }
+        .kanban-column { background-color: #f3f4f6; border-radius: 0.5rem; padding: 0.5rem; }
+        .kanban-column h4 { font-weight: 600; padding: 0.5rem; color: var(--text-secondary); }
+        .kanban-cards { min-height: 150px; }
+        .kanban-card { background-color: white; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); cursor: grab; }
+        .kanban-card:active { cursor: grabbing; }
+        .kanban-card p { font-size: 0.875rem; }
+        .kanban-card .notes { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;}
+        .kanban-placeholder { background-color: #e0e7ff; border: 2px dashed #a5b4fc; border-radius: 0.5rem; height: 50px; margin-bottom: 0.5rem;}
+    </style>
 </head>
-
 <body class="antialiased text-slate-700">
 
+    <div id="loading" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p class="text-slate-600 font-medium">Loading...</p>
+    </div>
+
+    <div id="confirm-modal" class="modal-overlay hidden opacity-0">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h3 id="modal-title" class="text-lg font-bold text-slate-800">Confirm Deletion</h3>
+            <p id="modal-message" class="text-sm text-slate-500 mt-2">Are you sure you want to delete this row? This action cannot be undone.</p>
+            <div id="modal-input-container" class="hidden mt-4">
+                <input type="text" id="modal-input" class="w-full border border-slate-300 rounded-md p-2" placeholder="Enter startup name...">
+            </div>
+            <div class="mt-6 flex justify-end space-x-2">
+                <button id="modal-cancel" class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">Cancel</button>
+                <button id="modal-confirm" class="btn-danger px-4 py-2 rounded-lg text-sm font-semibold">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-4 sm:p-6 lg:p-8 max-w-full lg:max-w-screen-2xl mx-auto">
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-slate-800">Startup Command Center</h1>
+            <p class="text-slate-500 mt-1">An all-in-one dashboard to manage your ventures.</p>
+        </header>
+
+        <div id="tabs-container" class="flex items-center border-b border-slate-200 mb-6 bg-white rounded-t-lg p-1">
+            <div id="tabs" class="flex items-center space-x-1 overflow-x-auto"></div>
+            <button id="add-startup-btn" title="Add New Startup" class="ml-2 p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-indigo-600">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+            </button>
+            <button id="remove-startup-btn" title="Remove Current Startup" class="ml-1 p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+            </button>
+        </div>
 
 
-    <div id="loading" class="loading-overlay hidden">
+        <div id="content-area" class="space-y-6"></div>
+    </div>
 
-        <div class="spinner"></div>
-
-        <p class="text-slate-600 font-medium">Loading...</p>
-
-    </div>
-
-
-
-    <div id="confirm-modal" class="modal-overlay hidden opacity-0">
-
-        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
-
-            <h3 id="modal-title" class="text-lg font-bold text-slate-800">Confirm Deletion</h3>
-
-            <p id="modal-message" class="text-sm text-slate-500 mt-2">Are you sure you want to delete this row? This action cannot be undone.</p>
-
-            <div id="modal-input-container" class="hidden mt-4">
-
-                <input type="text" id="modal-input" class="w-full border border-slate-300 rounded-md p-2" placeholder="Enter startup name...">
-
-            </div>
-
-            <div class="mt-6 flex justify-end space-x-2">
-
-                <button id="modal-cancel" class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">Cancel</button>
-
-                <button id="modal-confirm" class="btn-danger px-4 py-2 rounded-lg text-sm font-semibold">Confirm</button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="p-4 sm:p-6 lg:p-8 max-w-full lg:max-w-screen-2xl mx-auto">
-
-        <header class="mb-6">
-
-            <h1 class="text-3xl font-bold text-slate-800">Startup Command Center</h1>
-
-            <p class="text-slate-500 mt-1">An all-in-one dashboard to manage your ventures.</p>
-
-        </header>
-
-
-
-        <div id="tabs-container" class="flex items-center border-b border-slate-200 mb-6 bg-white rounded-t-lg p-1">
-
-            <div id="tabs" class="flex items-center space-x-1 overflow-x-auto"></div>
-
-            <button id="add-startup-btn" title="Add New Startup" class="ml-2 p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-indigo-600">
-
-                <i data-lucide="plus-circle" class="w-5 h-5"></i>
-
-            </button>
-
-            <button id="remove-startup-btn" title="Remove Current Startup" class="ml-1 p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
-
-                <i data-lucide="trash-2" class="w-5 h-5"></i>
-
-            </button>
-
-        </div>
-
-
-
-
-
-        <div id="content-area" class="space-y-6"></div>
-
-    </div>
-
-
-
-    <script>
-Of course. I am so sorry about that! You are absolutely right, there is a bug in the code that is stopping the cards from being created in the first place. My previous fix was for a different, more subtle issue, but this one is the showstopper.
-
-I've found the error. The script is crashing because it's trying to add the "edit" and "delete" functionalities to the table rows *before* the cards they live in are actually on the page.
-
-Let's get this fixed right now. We will need to modify two functions: `createSectionCard` and `renderTableRows`.
-
-### Overview of the Solution
-
-1.  **The Problem:** The `renderTableRows` function was responsible for both creating the rows and attaching the `onblur` (for editing) and `onclick` (for deleting) event listeners. However, because the card element isn't on the webpage yet when this function is called, the code `tbody.closest('.card')` returns `null`, which crashes the script.
-2.  **The Fix:** We will move the responsibility of attaching those event listeners out of `renderTableRows` and into the `createSectionCard` function. The `createSectionCard` function has the complete `card` element available and can attach the listeners correctly before it returns the card to be placed on the page.
-
-This ensures the script doesn't crash and that all the cards are created and displayed correctly.
-
-### Full Updated JavaScript Code
-
-This is the complete and final version of your script. Please replace everything inside your `<script>` tags with this code. I have marked the two functions that contain the critical changes.
-
-```javascript
+<script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- Configuration & Initial Data ---
     const LOCAL_STORAGE_KEY = 'startupCommandCenterData_v7';
@@ -416,18 +251,34 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(appData));
     }
 
+    // ==========================================================
+    // ===== CORRECTION #1: ROBUST DATA LOADING =================
+    // ==========================================================
     function loadDataFromLocalStorage() {
         const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (savedData) {
-            appData = JSON.parse(savedData);
-            Object.keys(blankStartup).forEach(sectionKey => {
-                Object.keys(appData).forEach(startupName => {
-                     if (!appData[startupName][sectionKey]) {
-                         appData[startupName][sectionKey] = [];
-                     }
-                })
-            });
+            try {
+                // TRY to parse the saved data
+                appData = JSON.parse(savedData);
+                // If successful, ensure all sections exist
+                Object.keys(blankStartup).forEach(sectionKey => {
+                    Object.keys(appData).forEach(startupName => {
+                         if (!appData[startupName][sectionKey]) {
+                             appData[startupName][sectionKey] = [];
+                         }
+                    });
+                });
+            } catch (error) {
+                // CATCH any error if parsing fails
+                console.error("Error parsing local storage data, resetting to default.", error);
+                // Clear the corrupted data from storage
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                // Load the default initial data instead
+                appData = initialData;
+                saveDataToLocalStorage(); // Save a clean version
+            }
         } else {
+            // If no data exists, load the default
             appData = initialData;
             saveDataToLocalStorage();
         }
@@ -656,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================
-    // ===== CORRECTED FUNCTION #1 ==============================
+    // ===== CORRECTION #2: CARD CREATION LOGIC ===============
     // ==========================================================
     function createSectionCard(key, config, data) {
         const card = document.createElement('div');
@@ -762,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
         
-        // Attaching event listeners here, after rows are rendered
+        // Attaching event listeners to the card element itself, not the document
         card.querySelectorAll('.cell-content, .editable-sub-cell').forEach(cell => cell.onblur = handleCellEdit);
         card.querySelectorAll('.delete-row').forEach(btn => btn.onclick = (e) => showDeleteModal(e));
 
@@ -799,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // ==========================================================
-    // ===== CORRECTED FUNCTION #2 ==============================
+    // ===== CORRECTION #3: ROW RENDERING LOGIC ===============
     // ==========================================================
     function renderTableRows(tbody, sectionKey, headers, data) {
          tbody.innerHTML = '';
@@ -815,7 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  tbody.appendChild(tr);
              });
          }
-         // Event listeners were moved from here to createSectionCard
+         // Event listener attachment was moved from here to fix a crash
     }
 
     function renderKanban(container, roadmapData) {
@@ -952,10 +803,12 @@ document.addEventListener('DOMContentLoaded', () => {
             value = value.split(': ')[1] || '';
         }
 
-        if (appData[activeTab][section][row] && appData[activeTab][section][row][key] != value) {
+        if (appData[activeTab][section] && appData[activeTab][section][row] && appData[activeTab][section][row][key] != value) {
             appData[activeTab][section][row][key] = value;
             saveDataToLocalStorage();
-            if(['kpis', 'budget', 'roadmap', 'gtm', 'actionItems', 'feedback', 'risks', 'financials'].includes(section)) render(); 
+            if(['kpis', 'budget', 'roadmap', 'gtm', 'actionItems', 'feedback', 'risks', 'financials'].includes(section)) {
+                render();
+            }
         }
     }
     
@@ -1043,14 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDataFromLocalStorage();
     render();
 });
-```
-
-    
-       
-
-    </script>
+</script>
 
 </body>
-
 </html>
-
