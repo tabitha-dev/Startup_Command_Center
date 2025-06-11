@@ -299,8 +299,25 @@
 
 
     <script>
+Of course. I am so sorry about that! You are absolutely right, there is a bug in the code that is stopping the cards from being created in the first place. My previous fix was for a different, more subtle issue, but this one is the showstopper.
 
-       document.addEventListener('DOMContentLoaded', () => {
+I've found the error. The script is crashing because it's trying to add the "edit" and "delete" functionalities to the table rows *before* the cards they live in are actually on the page.
+
+Let's get this fixed right now. We will need to modify two functions: `createSectionCard` and `renderTableRows`.
+
+### Overview of the Solution
+
+1.  **The Problem:** The `renderTableRows` function was responsible for both creating the rows and attaching the `onblur` (for editing) and `onclick` (for deleting) event listeners. However, because the card element isn't on the webpage yet when this function is called, the code `tbody.closest('.card')` returns `null`, which crashes the script.
+2.  **The Fix:** We will move the responsibility of attaching those event listeners out of `renderTableRows` and into the `createSectionCard` function. The `createSectionCard` function has the complete `card` element available and can attach the listeners correctly before it returns the card to be placed on the page.
+
+This ensures the script doesn't crash and that all the cards are created and displayed correctly.
+
+### Full Updated JavaScript Code
+
+This is the complete and final version of your script. Please replace everything inside your `<script>` tags with this code. I have marked the two functions that contain the critical changes.
+
+```javascript
+document.addEventListener('DOMContentLoaded', () => {
     // --- Configuration & Initial Data ---
     const LOCAL_STORAGE_KEY = 'startupCommandCenterData_v7';
 
@@ -638,6 +655,9 @@
         riskMatrixChart.render();
     }
 
+    // ==========================================================
+    // ===== CORRECTED FUNCTION #1 ==============================
+    // ==========================================================
     function createSectionCard(key, config, data) {
         const card = document.createElement('div');
         card.className = 'card flex flex-col';
@@ -742,6 +762,10 @@
             };
         });
         
+        // Attaching event listeners here, after rows are rendered
+        card.querySelectorAll('.cell-content, .editable-sub-cell').forEach(cell => cell.onblur = handleCellEdit);
+        card.querySelectorAll('.delete-row').forEach(btn => btn.onclick = (e) => showDeleteModal(e));
+
         if (key !== 'roadmap') {
             const addButton = card.querySelector(`#add-${key}`);
             if (addButton) {
@@ -774,6 +798,9 @@
         return card;
     }
     
+    // ==========================================================
+    // ===== CORRECTED FUNCTION #2 ==============================
+    // ==========================================================
     function renderTableRows(tbody, sectionKey, headers, data) {
          tbody.innerHTML = '';
          if (data.length === 0) {
@@ -781,15 +808,14 @@
          } else {
              data.forEach((row) => {
                  const originalIndex = appData[activeTab][sectionKey].findIndex(item => item.id === row.id);
-                 if (originalIndex === -1) return; 
+                 if (originalIndex === -1) return;
                  const tr = document.createElement('tr');
                  tr.className = 'bg-white border-b last:border-b-0 hover:bg-slate-50 transition-colors';
                  tr.innerHTML = headers.map(header => createCell(sectionKey, header, row, originalIndex)).join('') + createDeleteCell(sectionKey, originalIndex);
                  tbody.appendChild(tr);
              });
          }
-         tbody.closest('.card').querySelectorAll('.cell-content, .editable-sub-cell').forEach(cell => cell.onblur = handleCellEdit);
-         tbody.closest('.card').querySelectorAll('.delete-row').forEach(btn => btn.onclick = (e) => showDeleteModal(e));
+         // Event listeners were moved from here to createSectionCard
     }
 
     function renderKanban(container, roadmapData) {
@@ -918,21 +944,18 @@
         render();
     }
 
-    // THIS IS THE CORRECTED FUNCTION
     function handleCellEdit(e) {
-        const { section: sectionKey, row: rowIndex, key } = e.target.dataset;
+        const { section, row, key } = e.target.dataset;
         let value = e.target.textContent;
 
         if(e.target.classList.contains('editable-sub-cell')) {
             value = value.split(': ')[1] || '';
         }
 
-        if (appData[activeTab][sectionKey][rowIndex] && appData[activeTab][sectionKey][rowIndex][key] != value) {
-            appData[activeTab][sectionKey][rowIndex][key] = value;
+        if (appData[activeTab][section][row] && appData[activeTab][section][row][key] != value) {
+            appData[activeTab][section][row][key] = value;
             saveDataToLocalStorage();
-            if(['kpis', 'budget', 'roadmap', 'gtm', 'actionItems', 'feedback', 'risks', 'financials'].includes(sectionKey)) {
-                render();
-            }
+            if(['kpis', 'budget', 'roadmap', 'gtm', 'actionItems', 'feedback', 'risks', 'financials'].includes(section)) render(); 
         }
     }
     
@@ -1020,7 +1043,9 @@
     loadDataFromLocalStorage();
     render();
 });
+```
 
+    
        
 
     </script>
