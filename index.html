@@ -1,1 +1,1742 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Startup Command Center</title>
+    <script src="//cdn.tailwindcss.com"></script>
+    <link href="//fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="//unpkg.com/lucide@latest"></script>
+    <script src="//cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+
+        :root {
+
+            --primary: #4f46e5;
+
+            --primary-light: #6366f1;
+
+            --background: #f8fafc;
+
+            --card-bg: #ffffff;
+
+            --text-primary: #1f2937;
+
+            --text-secondary: #6b7280;
+
+            --border-color: #e5e7eb;
+
+        }
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            background-color: var(--background);
+
+            color: var(--text-primary);
+
+        }
+
+        .tab {
+
+            transition: all 0.2s ease-in-out;
+
+            border-bottom: 3px solid transparent;
+
+        }
+
+        .tab-active {
+
+            color: var(--primary);
+
+            font-weight: 600;
+
+            border-bottom-color: var(--primary);
+
+        }
+
+        .tab-inactive { color: var(--text-secondary); }
+
+        .tab-inactive:hover { color: var(--primary); background-color: #f3f4f6; }
+
+        .card {
+
+            background-color: var(--card-bg);
+
+            border-radius: 0.75rem;
+
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+            overflow: hidden;
+
+            transition: transform 0.2s, box-shadow 0.2s;
+
+        }
+
+        .card:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+        }
+
+        .card-header {
+
+             background: linear-gradient(135deg, var(--primary), var(--primary-light));
+
+        }
+
+        .table-container { 
+
+            max-height: 280px; 
+
+            overflow-y: auto;
+
+        }
+
+        /* Styled Scrollbar */
+
+        .table-container::-webkit-scrollbar { width: 8px; }
+
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+
+        .table-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+        .table-container::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+
+
+        th { background-color: #f9fafb; position: sticky; top: 0; z-index: 1; cursor: pointer; }
+
+        th:hover { background-color: #f3f4f6; }
+
+        .cell-content[contenteditable="true"]:focus {
+
+             outline: 2px solid var(--primary);
+
+             outline-offset: -2px;
+
+             background-color: #eef2ff;
+
+        }
+
+        .btn-primary { background-color: var(--primary); color: white; }
+
+        .btn-primary:hover { background-color: #4338ca; }
+
+        .btn-danger { background-color: #ef4444; color: white; }
+
+        .btn-danger:hover { background-color: #dc2626; }
+
+        .btn-secondary { background-color: #e5e7eb; color: #374151; }
+
+        .btn-secondary:hover { background-color: #d1d5db; }
+
+        .loading-overlay, .modal-overlay {
+
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+
+            background-color: rgba(249, 250, 251, 0.8);
+
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+
+            backdrop-filter: blur(4px);
+
+            transition: opacity 0.2s;
+
+        }
+
+        .spinner {
+
+            border: 4px solid rgba(0, 0, 0, 0.1);
+
+            width: 36px; height: 36px; border-radius: 50%;
+
+            border-left-color: var(--primary);
+
+            animation: spin 1s ease infinite;
+
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .status-badge {
+
+            display: inline-block;
+
+            padding: 2px 10px;
+
+            border-radius: 9999px;
+
+            font-weight: 500;
+
+            font-size: 0.75rem;
+
+            text-transform: uppercase;
+
+        }
+
+        .progress-bar-bg { background-color: #e5e7eb; border-radius: 99px; }
+
+        .progress-bar { background: linear-gradient(to right, var(--primary-light), var(--primary)); height: 8px; border-radius: 99px; transition: width 0.3s ease; }
+
+        .apexcharts-legend-text { color: var(--text-primary) !important; }
+
+        .apexcharts-tooltip-title, .apexcharts-tooltip-text { color: #1f2937 !important; }
+
+        
+
+        /* Kanban Styles */
+
+        .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 1rem; }
+
+        .kanban-column { background-color: #f3f4f6; border-radius: 0.5rem; padding: 0.5rem; }
+
+        .kanban-column h4 { font-weight: 600; padding: 0.5rem; color: var(--text-secondary); }
+
+        .kanban-cards { min-height: 150px; }
+
+        .kanban-card { background-color: white; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); cursor: grab; }
+
+        .kanban-card:active { cursor: grabbing; }
+
+        .kanban-card p { font-size: 0.875rem; }
+
+        .kanban-card .notes { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;}
+
+        .kanban-placeholder { background-color: #e0e7ff; border: 2px dashed #a5b4fc; border-radius: 0.5rem; height: 50px; margin-bottom: 0.5rem;}
+
+    </style>
+
+</head>
+
+<body class="antialiased text-slate-700">
+
+
+
+    <div id="loading" class="loading-overlay hidden">
+
+        <div class="spinner"></div>
+
+        <p class="text-slate-600 font-medium">Loading...</p>
+
+    </div>
+
+
+
+    <div id="confirm-modal" class="modal-overlay hidden opacity-0">
+
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+
+            <h3 id="modal-title" class="text-lg font-bold text-slate-800">Confirm Deletion</h3>
+
+            <p id="modal-message" class="text-sm text-slate-500 mt-2">Are you sure you want to delete this row? This action cannot be undone.</p>
+
+            <div id="modal-input-container" class="hidden mt-4">
+
+                <input type="text" id="modal-input" class="w-full border border-slate-300 rounded-md p-2" placeholder="Enter startup name...">
+
+            </div>
+
+            <div class="mt-6 flex justify-end space-x-2">
+
+                <button id="modal-cancel" class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">Cancel</button>
+
+                <button id="modal-confirm" class="btn-danger px-4 py-2 rounded-lg text-sm font-semibold">Confirm</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="p-4 sm:p-6 lg:p-8 max-w-full lg:max-w-screen-2xl mx-auto">
+
+        <header class="mb-6">
+
+            <h1 class="text-3xl font-bold text-slate-800">Startup Command Center</h1>
+
+            <p class="text-slate-500 mt-1">An all-in-one dashboard to manage your ventures.</p>
+
+        </header>
+
+
+
+        <div id="tabs-container" class="flex items-center border-b border-slate-200 mb-6 bg-white rounded-t-lg p-1">
+
+            <div id="tabs" class="flex items-center space-x-1 overflow-x-auto"></div>
+
+            <button id="add-startup-btn" title="Add New Startup" class="ml-2 p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-indigo-600">
+
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+
+            </button>
+
+            <button id="remove-startup-btn" title="Remove Current Startup" class="ml-1 p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
+
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+
+            </button>
+
+        </div>
+
+
+
+
+
+        <div id="content-area" class="space-y-6"></div>
+
+    </div>
+
+
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Configuration & Initial Data ---
+
+            const LOCAL_STORAGE_KEY = 'startupCommandCenterData_v7';
+
+
+
+            const blankStartup = {
+
+                team: [], kpis: [], roadmap: [], financials: [], engagement: [], budget: [], risks: [], legal: [], competitors: [], swot: [], gtm: [], funding: [], investorUpdates: [], feedback: [], actionItems: [], dora: [], techDebt: [], hiring: [], marketProfile: [], brandHub: [], salesPipeline: []
+
+            };
+
+
+
+            const initialData = {
+
+                "Startup Alpha": {
+
+                    team: [ { id: 't1', name: 'Project Manager', role: 'Leads client communication', notes: 'Internal' } ],
+
+                    kpis: [ { id: 'k1', metric: 'Nonprofits Onboarded', current: 2, target: 10, notes: 'Quarterly Goal' }, { id: 'k2', metric: 'Avg. Setup Time (Weeks)', current: 5, target: 4, notes: 'Lower is better' } ],
+
+                    roadmap: [ 
+
+                        { id: 'r1', phase: 'Onboarding & Needs Analysis', status: 'In Progress', notes: 'Current client: Hope Foundation' },
+
+                        { id: 'r2', phase: 'Website & Email Setup', status: 'To Do', notes: 'Awaiting client content' },
+
+                        { id: 'r3', phase: 'Security & Accessibility', status: 'To Do', notes: 'Scheduled' },
+
+                        { id: 'r4', phase: 'Training & Handover', status: 'Completed', notes: '' },
+
+                    ],
+
+                    budget: [ { id: 'b1', category: 'Website Setup & Hosting', cost: 400, notes: 'Per client' }, { id: 'b2', category: 'Communication Tools', cost: 100, notes: 'Per client' } ],
+
+                    risks: [ { id: 'rk1', risk: 'Client delays in content or feedback', mitigation: 'Frequent communication', probability: 'High', impact: 'Medium' } ],
+
+                    financials: [ 
+
+                        { id: 'fin1', metric: 'MRR', value: '200' }, 
+
+                        { id: 'fin2', metric: 'Setup Fee Revenue', value: '$2,000' },
+
+                        { id: 'fin3', metric: 'LTV', value: '2200' },
+
+                        { id: 'fin4', metric: 'CAC', value: '50' }
+
+                    ],
+
+                    engagement: [ { id: 'eng1', metric: 'Active Clients', value: '2', notes: '' } ],
+
+                    legal: [ { id: 'leg1', item: 'Service Level Agreements (SLA)', status: 'Completed', notes: 'Standard template created' } ],
+
+                    competitors: [ { id: 'c1', name: 'Large Tech Consultancies', strengths: 'Broad service range.', weaknesses: 'High cost.', website: ''} ],
+
+                    swot: [ { id: 'sw1', category: 'Strengths', points: 'Deep expertise in nonprofit needs' } ],
+
+                    gtm: [ { id: 'gt1', task: 'Create landing page', status: 'Completed', owner: 'Web Dev' } ],
+
+                    funding: [ { id: 'fu1', round: 'Pre-seed (Friends & Family)', date: 'Jan 2024', amount: '25000', valuation: '$500,000', keyinvestors: 'N/A' } ],
+
+                    investorUpdates: [ { id: 'iu1', date: 'Mar 2025', subject: 'Q1 2025 Progress Report', linktoupdate: 'link/to/doc1' } ],
+
+                    feedback: [ { id: 'fb1', item: 'Request: Integration with DonorBox', source: 'Hope Foundation', priority: 'High', status: 'Backlog' } ],
+
+                    actionItems: [ { id: 'ai1', task: 'Follow up with legal on vendor contract', owner: 'PM', duedate: '2025-06-15', status: 'In Progress' } ],
+
+                    dora: [ {id: 'do1', metric: 'Deployment Frequency', value: 'Weekly', notes: 'Staging & Prod'} ],
+
+                    techDebt: [ {id: 'td1', item: 'Refactor user auth module', priority: 'Medium', notes: 'Legacy code is slow'} ],
+
+                    hiring: [ {id: 'h1', role: 'Junior Web Developer', status: 'Sourcing', pipeline: '5 candidates'} ],
+
+                    marketProfile: [ 
+
+                        { id: 'mp1', item: 'Problem Statement', details: 'Nonprofits lack the time and technical expertise to manage a modern digital presence securely and affordably.' },
+
+                        { id: 'mp2', item: 'Ideal Customer Profile (ICP)', details: 'Small to mid-sized nonprofits (5-50 employees) with outdated websites and a desire to improve online fundraising and outreach.' },
+
+                        { id: 'mp3', item: 'Market Size (TAM)', details: '$5B - Digital services for all US nonprofits.' }
+
+                    ],
+
+                    brandHub: [
+
+                        { id: 'bh1', item: 'Mission Statement', details: 'To empower mission-driven organizations to focus on their core impact, not technology hurdles.' },
+
+                        { id: 'bh2', item: 'Elevator Pitch', details: 'We provide an all-in-one digital toolkit (website, email, security) with predictable pricing and dedicated support, specifically for nonprofits.' }
+
+                    ],
+
+                    salesPipeline: [
+
+                        { id: 'sp1', deal: 'Global Relief Fund', value: 1000, stage: 'Qualified', owner: 'PM' },
+
+                        { id: 'sp2', deal: 'Local Arts Council', value: 1000, stage: 'Proposal Sent', owner: 'PM' }
+
+                    ]
+
+                },
+
+                "Startup Beta": { ...blankStartup },
+
+                "Venture Gamma": { ...blankStartup },
+
+                "Project Delta": { ...blankStartup },
+
+            };
+
+
+
+            const sectionConfig = {
+
+                kpis: { title: 'Key Performance Indicators', icon: 'trending-up', headers: ['Metric', 'Progress', 'Notes'], newRow: { id: '', metric: 'New KPI', current: 0, target: 100, notes: '' } },
+
+                financials: { title: 'Financial Health', icon: 'dollar-sign', headers: ['Metric', 'Value', 'Notes'], newRow: { id: '', metric: 'Cash Runway', value: '0 months', notes: '' } },
+
+                engagement: { title: 'User Engagement', icon: 'users', headers: ['Metric', 'Value', 'Notes'], newRow: { id: '', metric: 'Retention Rate', value: '0%', notes: '' } },
+
+                actionItems: { title: 'Master Action Items', icon: 'check-square', headers: ['Task', 'Owner', 'Due Date', 'Status'], newRow: { id: '', task: 'New Action Item', owner: '', duedate: '', status: 'To Do' } },
+
+                roadmap: { title: 'Project Roadmap', icon: 'map', headers: ['Phase', 'Status', 'Notes'], newRow: { id: '', phase: 'New Phase', status: 'To Do', notes: '' } },
+
+                salesPipeline: { title: 'Sales Pipeline', icon: 'handshake', headers: ['Deal', 'Value', 'Stage', 'Owner'], newRow: { id: '', deal: '', value: 0, stage: 'Lead', owner: '' } },
+
+                dora: { title: 'Engineering Velocity (DORA)', icon: 'rocket', headers: ['Metric', 'Value', 'Notes'], newRow: { id: '', metric: '', value: '', notes: '' } },
+
+                marketProfile: { title: 'Market & Customer Profile', icon: 'target', headers: ['Item', 'Details'], newRow: { id: '', item: '', details: '' } },
+
+                brandHub: { title: 'Brand & Messaging Hub', icon: 'gem', headers: ['Item', 'Details'], newRow: { id: '', item: '', details: '' } },
+
+                hiring: { title: 'Hiring Pipeline', icon: 'user-plus', headers: ['Role', 'Status', 'Pipeline'], newRow: { id: '', role: '', status: 'Sourcing', pipeline: '' } },
+
+                feedback: { title: 'Feedback & Bugs', icon: 'message-square', headers: ['Item', 'Source', 'Priority', 'Status'], newRow: { id: '', item: '', source: 'User', priority: 'Medium', status: 'Backlog' } },
+
+                funding: { title: 'Funding Rounds', icon: 'database', headers: ['Round', 'Date', 'Amount', 'Valuation', 'Investors'], newRow: { id: '', round: 'Seed', date: '', amount: '', valuation: '', investors: '' } },
+
+                swot: { title: 'SWOT Analysis', icon: 'zap', headers: ['Category', 'Points'], newRow: { id: '', category: 'Strengths', points: '' } },
+
+                gtm: { title: 'Go-to-Market Checklist', icon: 'send', headers: ['Task', 'Status', 'Owner'], newRow: { id: '', task: 'New GTM Task', status: 'To Do', owner: '' } },
+
+                investorUpdates: { title: 'Investor Updates', icon: 'clipboard-list', headers: ['Date', 'Subject', 'Link to Update'], newRow: { id: '', date: '', subject: 'Q3 Update', linktoupdate: '' } },
+
+                team: { title: 'Team Members', icon: 'user-check', headers: ['Name', 'Role', 'Notes'], newRow: { id: '', name: 'New Member', role: '', notes: '' } },
+
+                competitors: { title: 'Competitor Analysis', icon: 'swords', headers: ['Name', 'Strengths', 'Weaknesses'], newRow: { id: '', name: '', strengths: '', weaknesses: '' } },
+
+                budget: { title: 'Budget', icon: 'credit-card', headers: ['Category', 'Cost', 'Notes'], newRow: { id: '', category: 'New Expense', cost: 0, notes: '' } },
+
+                risks: { title: 'Risk Management', icon: 'alert-triangle', headers: ['Risk', 'Mitigation', 'Probability', 'Impact'], newRow: { id: '', risk: 'New Risk', mitigation: '', probability: 'Low', impact: 'Low' } },
+
+                legal: { title: 'Legal & Compliance', icon: 'shield', headers: ['Item', 'Status', 'Notes'], newRow: { id: '', item: 'New Item', status: 'To Do', notes: '' } },
+
+            };
+
+            
+
+            let appData = {}, activeTab = 'Portfolio Overview', rowToDelete = null, modalAction = null;
+
+            let budgetChart = null, taskStatusChart = null, riskMatrixChart = null;
+
+            let sortState = {};
+
+
+
+            const removeStartupBtn = document.getElementById('remove-startup-btn');
+
+            const contentArea = document.getElementById('content-area');
+
+            const confirmModal = document.getElementById('confirm-modal');
+
+            const modalTitle = document.getElementById('modal-title');
+
+            const modalMessage = document.getElementById('modal-message');
+
+            const modalInputContainer = document.getElementById('modal-input-container');
+
+            const modalInput = document.getElementById('modal-input');
+
+            const modalCancel = document.getElementById('modal-cancel');
+
+            const modalConfirm = document.getElementById('modal-confirm');
+
+
+
+            // --- Data Persistence ---
+
+            function saveDataToLocalStorage() {
+
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(appData));
+
+            }
+
+
+
+            function loadDataFromLocalStorage() {
+
+                const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+                if (savedData) {
+
+                    appData = JSON.parse(savedData);
+
+                    Object.keys(blankStartup).forEach(sectionKey => {
+
+                        Object.keys(appData).forEach(startupName => {
+
+                             if (!appData[startupName][sectionKey]) {
+
+                                appData[startupName][sectionKey] = [];
+
+                            }
+
+                        })
+
+                    });
+
+                } else {
+
+                    appData = initialData;
+
+                    saveDataToLocalStorage();
+
+                }
+
+            }
+
+            
+
+            // --- Rendering Engine ---
+
+            function render() {
+
+                renderTabs();
+
+                if (activeTab === 'Portfolio Overview') {
+
+                    renderPortfolioOverview();
+
+                } else {
+
+                    renderStartupContent();
+
+                }
+
+                lucide.createIcons();
+
+            }
+
+
+
+            function renderTabs() {
+
+                const tabsContainer = document.getElementById('tabs');
+
+                tabsContainer.innerHTML = '';
+
+                const tabs = ['Portfolio Overview', ...Object.keys(appData)];
+
+                tabs.forEach(name => {
+
+                    const tab = document.createElement('button');
+
+                    tab.textContent = name;
+
+                    tab.className = `px-4 py-3 text-sm font-medium rounded-md tab ${name === activeTab ? 'tab-active' : 'tab-inactive'}`;
+
+                    tab.onclick = () => { activeTab = name; render(); };
+
+                    tabsContainer.appendChild(tab);
+
+                });
+
+                removeStartupBtn.disabled = activeTab === 'Portfolio Overview';
+
+            }
+
+            
+
+            function renderStartupContent() {
+
+                contentArea.innerHTML = '';
+
+                const data = appData[activeTab];
+
+                if (!data) return;
+
+
+
+                const visualCard = document.createElement('div');
+
+                visualCard.className = 'card mb-6';
+
+                visualCard.innerHTML = `
+
+                    <div class="card-header p-4 flex items-center gap-3 text-white">
+
+                         <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+
+                        <h3 class="text-lg font-semibold">Visual Dashboard</h3>
+
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+
+                        <div id="budget-chart-container"></div>
+
+                        <div id="task-status-chart-container"></div>
+
+                        <div id="risk-matrix-chart-container"></div>
+
+                    </div>`;
+
+                contentArea.appendChild(visualCard);
+
+                renderCharts(data);
+
+
+
+                const cardsGrid = document.createElement('div');
+
+                cardsGrid.className = 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6';
+
+                contentArea.appendChild(cardsGrid);
+
+
+
+                Object.keys(sectionConfig).forEach((key) => {
+
+                    const config = sectionConfig[key];
+
+                    const sectionData = data[key] || [];
+
+                    const card = createSectionCard(key, config, sectionData);
+
+                    cardsGrid.appendChild(card);
+
+                });
+
+            }
+
+
+
+            function renderPortfolioOverview() {
+
+                contentArea.innerHTML = '';
+
+
+
+                let totalFunding = 0;
+
+                Object.values(appData).forEach(startup => {
+
+                    if(startup.funding) {
+
+                        startup.funding.forEach(round => {
+
+                            totalFunding += parseFloat(round.amount) || 0;
+
+                        });
+
+                    }
+
+                });
+
+                
+
+                const summaryCard = document.createElement('div');
+
+                summaryCard.className = 'card mb-6 p-6';
+
+                summaryCard.innerHTML = `
+
+                    <h3 class="text-xl font-bold text-slate-800">Portfolio At-a-Glance</h3>
+
+                    <div class="mt-4 text-center">
+
+                        <p class="text-lg text-slate-500">Total Funding Raised</p>
+
+                        <p class="text-5xl font-bold text-indigo-600">$${totalFunding.toLocaleString()}</p>
+
+                    </div>
+
+                `;
+
+                contentArea.appendChild(summaryCard);
+
+
+
+                const overviewGrid = document.createElement('div');
+
+                overviewGrid.className = 'grid grid-cols-1 lg:grid-cols-2 gap-6';
+
+                contentArea.appendChild(overviewGrid);
+
+                
+
+                const kpiSnapshotCard = document.createElement('div');
+
+                kpiSnapshotCard.className = 'card';
+
+                kpiSnapshotCard.innerHTML = `
+
+                    <div class="card-header p-4 flex items-center gap-3 text-white">
+
+                        <i data-lucide="trending-up" class="w-6 h-6"></i>
+
+                        <h3 class="text-lg font-semibold">Key Metrics Snapshot</h3>
+
+                    </div>
+
+                    <div class="p-4 space-y-4">
+
+                        ${Object.entries(appData).map(([name, startup]) => {
+
+                            const mrrKpi = startup.financials?.find(f => f.metric.toLowerCase().includes('mrr'));
+
+                            let displayKpi = 'No primary KPI set.';
+
+                            if (mrrKpi) {
+
+                                displayKpi = `MRR: ${mrrKpi.value}`;
+
+                            } else if (startup.kpis && startup.kpis.length > 0) {
+
+                                displayKpi = `${startup.kpis[0].metric}: ${startup.kpis[0].current}`;
+
+                            }
+
+                            return `
+
+                                <div>
+
+                                    <h4 class="font-semibold text-indigo-600">${name}</h4>
+
+                                    <p class="text-sm text-slate-600">${displayKpi}</p>
+
+                                </div>
+
+                            `;
+
+                        }).join('')}
+
+                    </div>
+
+                `;
+
+                overviewGrid.appendChild(kpiSnapshotCard);
+
+
+
+                const priorityCard = document.createElement('div');
+
+                priorityCard.className = 'card';
+
+                 priorityCard.innerHTML = `
+
+                    <div class="card-header p-4 flex items-center gap-3 text-white">
+
+                        <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+
+                        <h3 class="text-lg font-semibold">Priority Items</h3>
+
+                    </div>
+
+                    <div class="p-4 space-y-4">
+
+                        <h4 class="font-bold">At-Risk Phases</h4>
+
+                        <ul class="list-disc list-inside text-sm space-y-1">
+
+                            ${Object.entries(appData).map(([name, startup]) => {
+
+                                return startup.roadmap?.filter(r => r.status && r.status.toLowerCase() === 'at risk').map(r => `<li><span class="font-semibold">${name}:</span> ${r.phase}</li>`).join('')
+
+                            }).filter(i => i).join('') || '<li>No at-risk phases.</li>'}
+
+                        </ul>
+
+                         <h4 class="font-bold mt-4">High Priority Feedback</h4>
+
+                        <ul class="list-disc list-inside text-sm space-y-1">
+
+                             ${Object.entries(appData).map(([name, startup]) => {
+
+                                return startup.feedback?.filter(f => f.priority && f.priority.toLowerCase() === 'high').map(f => `<li><span class="font-semibold">${name}:</span> ${f.item}</li>`).join('')
+
+                            }).filter(i => i).join('') || '<li>No high priority feedback.</li>'}
+
+                        </ul>
+
+                    </div>
+
+                `;
+
+                overviewGrid.appendChild(priorityCard);
+
+            }
+
+            
+
+            function renderCharts(data) {
+
+                const chartFontColor = '#374151';
+
+                const chartColors = ['#4f46e5', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'];
+
+                const statusColors = {'Completed': '#10b981', 'In Progress': '#f59e0b', 'At Risk': '#ef4444', 'To Do': '#6b7280', 'Done': '#10b981', 'Stuck': '#ef4444', 'Backlog': '#ef4444' };
+
+                
+
+                // Budget Chart
+
+                const budgetData = data.budget || [];
+
+                if (budgetChart) budgetChart.destroy();
+
+                const budgetOptions = {
+
+                    series: budgetData.length ? budgetData.map(item => parseFloat(item.cost) || 0) : [1],
+
+                    labels: budgetData.length ? budgetData.map(item => item.category) : ['No Data'],
+
+                    chart: { type: 'donut', height: 250, animations: { enabled: true } },
+
+                    colors: budgetData.length ? chartColors : ['#e5e7eb'],
+
+                    title: { text: 'Budget Breakdown', align: 'center', style: { color: chartFontColor, fontSize: '16px' } },
+
+                    legend: { position: 'bottom', labels: { colors: chartFontColor } },
+
+                };
+
+                budgetChart = new ApexCharts(document.querySelector("#budget-chart-container"), budgetOptions);
+
+                budgetChart.render();
+
+                
+
+                // Task Status Chart
+
+                if(taskStatusChart) taskStatusChart.destroy();
+
+                const statusData = [
+
+                    ...(data.roadmap || []),
+
+                    ...(data.gtm || []),
+
+                    ...(data.actionItems || [])
+
+                ];
+
+                const statusCounts = statusData.reduce((acc, item) => {
+
+                    const status = item.status || 'N/A';
+
+                    acc[status] = (acc[status] || 0) + 1;
+
+                    return acc;
+
+                }, {});
+
+                const taskStatusOptions = {
+
+                    series: Object.keys(statusCounts).length ? Object.values(statusCounts) : [1],
+
+                    labels: Object.keys(statusCounts).length ? Object.keys(statusCounts) : ['No Data'],
+
+                    chart: { type: 'pie', height: 250, animations: { enabled: true } },
+
+                    colors: Object.keys(statusCounts).map(status => statusColors[status] || '#9ca3af'),
+
+                    title: { text: 'Task Status Overview', align: 'center', style: { color: chartFontColor, fontSize: '16px' } },
+
+                    legend: { position: 'bottom', labels: { colors: chartFontColor } },
+
+                };
+
+                taskStatusChart = new ApexCharts(document.querySelector("#task-status-chart-container"), taskStatusOptions);
+
+                taskStatusChart.render();
+
+                
+
+                // Risk Matrix Chart
+
+                if(riskMatrixChart) riskMatrixChart.destroy();
+
+                const riskData = data.risks || [];
+
+                const levelMap = { 'low': 1, 'medium': 2, 'high': 3 };
+
+                const riskSeries = riskData.map(risk => ({
+
+                    name: risk.risk,
+
+                    data: [[levelMap[risk.probability?.toLowerCase()] || 0, levelMap[risk.impact?.toLowerCase()] || 0]]
+
+                }));
+
+                const riskMatrixOptions = {
+
+                    series: riskSeries.length ? riskSeries : [{ name: 'No Data', data: [] }],
+
+                    chart: { type: 'scatter', height: 250, zoom: { enabled: false } },
+
+                    title: { text: 'Risk Matrix', align: 'center', style: { color: chartFontColor, fontSize: '16px' } },
+
+                    xaxis: { 
+
+                        tickAmount: 3, 
+
+                        min: 0, max: 4,
+
+                        labels: { formatter: (val) => ({ 1: 'Low', 2: 'Medium', 3: 'High' }[val] || '') } ,
+
+                        title: { text: 'Probability', style: { color: chartFontColor } }
+
+                    },
+
+                    yaxis: { 
+
+                        tickAmount: 3, 
+
+                        min: 0, max: 4,
+
+                        labels: { formatter: (val) => ({ 1: 'Low', 2: 'Medium', 3: 'High' }[val] || '') } ,
+
+                        title: { text: 'Impact', style: { color: chartFontColor } }
+
+                    },
+
+                    grid: {
+
+                        xaxis: { lines: { show: true } },
+
+                        yaxis: { lines: { show: true } },
+
+                    },
+
+                    annotations: {
+
+                        xaxis: [{ x: 2.5, borderColor: '#999', label: { style: { background: '#fff' } } }],
+
+                        yaxis: [{ y: 2.5, borderColor: '#999', label: { style: { background: '#fff' } } }]
+
+                    },
+
+                    tooltip: {
+
+                        custom: function({ seriesIndex, w }) {
+
+                            const risk = w.globals.seriesNames[seriesIndex];
+
+                            return `<div class="p-2"><b>Risk:</b> ${risk}</div>`;
+
+                        }
+
+                    },
+
+                    legend: { show: false }
+
+                };
+
+                riskMatrixChart = new ApexCharts(document.querySelector("#risk-matrix-chart-container"), riskMatrixOptions);
+
+                riskMatrixChart.render();
+
+            }
+
+
+
+            function createSectionCard(key, config, data) {
+
+                const card = document.createElement('div');
+
+                card.className = 'card flex flex-col';
+
+                let extraHeader = '';
+
+                
+
+                if (key === 'financials') {
+
+                    const ltvEntry = data.find(item => item.metric?.toLowerCase() === 'ltv');
+
+                    const cacEntry = data.find(item => item.metric?.toLowerCase() === 'cac');
+
+                    const ltv = parseFloat(ltvEntry?.value) || 0;
+
+                    const cac = parseFloat(cacEntry?.value) || 0;
+
+                    let ratio = 0;
+
+                    if(cac > 0) {
+
+                        ratio = ltv / cac;
+
+                    }
+
+                    let ratioColor = 'text-slate-500';
+
+                    if(ratio >= 3) ratioColor = 'text-green-500';
+
+                    else if (ratio >= 1) ratioColor = 'text-yellow-500';
+
+                    else if (ratio > 0) ratioColor = 'text-red-500';
+
+                    
+
+                    extraHeader = `
+
+                        <div class="p-4 border-b">
+
+                            <h4 class="font-semibold text-center">Key Ratio</h4>
+
+                            <div class="text-center mt-1">
+
+                                <span class="font-bold text-2xl ${ratioColor}">${ratio > 0 ? ratio.toFixed(1) + ':1' : 'N/A'}</span>
+
+                                <p class="text-xs text-slate-500">LTV : CAC</p>
+
+                            </div>
+
+                        </div>`;
+
+                }
+
+
+
+                card.innerHTML = `
+
+                    <div class="card-header p-4 flex items-center justify-between text-white">
+
+                        <div class="flex items-center gap-3">
+
+                            <i data-lucide="${config.icon}" class="w-6 h-6"></i>
+
+                            <h3 class="text-lg font-semibold">${config.title}</h3>
+
+                        </div>
+
+                        <div class="flex items-center gap-2">
+
+                             <div class="relative">
+
+                                <input type="search" placeholder="Search..." class="search-box bg-white/20 text-white placeholder-white/70 text-sm rounded-md pl-8 pr-2 py-1 focus:outline-none focus:ring-2 focus:ring-white/50 w-40">
+
+                                <i data-lucide="search" class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70"></i>
+
+                            </div>
+
+                            ${ (key !== 'roadmap') ? `<button id="add-${key}" class="text-sm font-semibold bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all">
+
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add
+
+                            </button>` : `
+
+                            <div class="flex items-center gap-2 bg-white/20 text-xs font-bold rounded-lg p-1">
+
+                                <button class="view-toggle rounded-md px-2 py-1 bg-white text-indigo-600" data-view="table">Table</button>
+
+                                <button class="view-toggle rounded-md px-2 py-1" data-view="board">Board</button>
+
+                            </div>
+
+                            `}
+
+                        </div>
+
+                    </div>
+
+                    ${extraHeader}
+
+                    <div class="table-container flex-grow">
+
+                        <table class="w-full text-sm text-left">
+
+                            <thead class="text-xs text-gray-500 uppercase">
+
+                                <tr>
+
+                                    ${config.headers.map(h => `<th scope="col" class="px-6 py-3" data-sortkey="${h.toLowerCase().replace(/\s/g, '').replace('%', '')}">${h}</th>`).join('')}
+
+                                    <th scope="col" class="px-6 py-3"><span class="sr-only">Delete</span></th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody></tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="kanban-board hidden"></div>
+
+                    `;
+
+                
+
+                const tbody = card.querySelector('tbody');
+
+                renderTableRows(tbody, key, config.headers, data);
+
+
+
+                const searchBox = card.querySelector('.search-box');
+
+                searchBox.oninput = (e) => {
+
+                    const searchTerm = e.target.value.toLowerCase();
+
+                    const filteredData = data.filter(row => 
+
+                        Object.values(row).some(val => 
+
+                            String(val).toLowerCase().includes(searchTerm)
+
+                        )
+
+                    );
+
+                    renderTableRows(tbody, key, config.headers, filteredData);
+
+                    lucide.createIcons();
+
+                };
+
+                
+
+                const headerCells = card.querySelectorAll('thead th[data-sortkey]');
+
+                headerCells.forEach(th => {
+
+                    th.onclick = () => {
+
+                        const sortKey = th.dataset.sortkey;
+
+                        const currentSort = sortState[key];
+
+                        let direction = 'asc';
+
+                        if(currentSort && currentSort.key === sortKey && currentSort.direction === 'asc') {
+
+                            direction = 'desc';
+
+                        }
+
+                        sortState[key] = { key: sortKey, direction };
+
+                        
+
+                        const sortedData = [...data].sort((a,b) => {
+
+                             const valA = a[sortKey]?.toLowerCase() || '';
+
+                             const valB = b[sortKey]?.toLowerCase() || '';
+
+                             if(valA < valB) return direction === 'asc' ? -1 : 1;
+
+                             if(valA > valB) return direction === 'asc' ? 1 : -1;
+
+                             return 0;
+
+                        });
+
+                        
+
+                        renderTableRows(tbody, key, config.headers, sortedData);
+
+                        lucide.createIcons();
+
+                    };
+
+                });
+
+                
+
+                if (key !== 'roadmap') {
+
+                    const addButton = card.querySelector(`#add-${key}`);
+
+                    if (addButton) {
+
+                        addButton.onclick = () => handleAddRow(key, config.newRow);
+
+                    }
+
+                } else {
+
+                     const viewToggles = card.querySelectorAll('.view-toggle');
+
+                    function toggleView(view) {
+
+                        const tableContainer = card.querySelector('.table-container');
+
+                        const kanbanContainer = card.querySelector('.kanban-board');
+
+                        if (view === 'board') {
+
+                            tableContainer.classList.add('hidden');
+
+                            kanbanContainer.classList.remove('hidden');
+
+                            renderKanban(kanbanContainer, data);
+
+                            viewToggles[0].classList.remove('bg-white', 'text-indigo-600');
+
+                            viewToggles[1].classList.add('bg-white', 'text-indigo-600');
+
+                        } else {
+
+                            kanbanContainer.classList.add('hidden');
+
+                            tableContainer.classList.remove('hidden');
+
+                            viewToggles[1].classList.remove('bg-white', 'text-indigo-600');
+
+                            viewToggles[0].classList.add('bg-white', 'text-indigo-600');
+
+                        }
+
+                    }
+
+                    toggleView('table');
+
+                    viewToggles.forEach(btn => {
+
+                        btn.onclick = () => toggleView(btn.dataset.view);
+
+                    });
+
+                }
+
+
+
+                return card;
+
+            }
+
+            
+
+            function renderTableRows(tbody, sectionKey, headers, data) {
+
+                 tbody.innerHTML = '';
+
+                 if (data.length === 0) {
+
+                    tbody.innerHTML = `<tr><td colspan="${headers.length + 1}" class="text-center p-4 text-slate-400">No results found.</td></tr>`;
+
+                } else {
+
+                    data.forEach((row) => {
+
+                        const originalIndex = appData[activeTab][sectionKey].findIndex(item => item.id === row.id);
+
+                        if (originalIndex === -1) return; // Should not happen with this logic
+
+                        const tr = document.createElement('tr');
+
+                        tr.className = 'bg-white border-b last:border-b-0 hover:bg-slate-50 transition-colors';
+
+                        tr.innerHTML = headers.map(header => createCell(sectionKey, header, row, originalIndex)).join('') + createDeleteCell(sectionKey, originalIndex);
+
+                        tbody.appendChild(tr);
+
+                    });
+
+                }
+
+                tbody.closest('.card').querySelectorAll('.cell-content, .editable-sub-cell').forEach(cell => cell.onblur = handleCellEdit);
+
+                tbody.closest('.card').querySelectorAll('.delete-row').forEach(btn => btn.onclick = (e) => showDeleteModal(e));
+
+            }
+
+
+
+            function renderKanban(container, roadmapData) {
+
+                container.innerHTML = `
+
+                    <div class="kanban-column" data-status="To Do"><h4>To Do</h4><div class="kanban-cards"></div></div>
+
+                    <div class="kanban-column" data-status="In Progress"><h4>In Progress</h4><div class="kanban-cards"></div></div>
+
+                    <div class="kanban-column" data-status="Completed"><h4>Completed</h4><div class="kanban-cards"></div></div>
+
+                `;
+
+                
+
+                roadmapData.forEach((item, index) => {
+
+                    const status = item.status || 'To Do';
+
+                    const column = container.querySelector(`.kanban-column[data-status="${status}"] .kanban-cards`);
+
+                    if(column) {
+
+                        const card = document.createElement('div');
+
+                        card.className = 'kanban-card';
+
+                        card.setAttribute('draggable', true);
+
+                        card.dataset.id = item.id;
+
+                        card.innerHTML = `<p class="font-semibold">${item.phase}</p><p class="notes">${item.notes || ''}</p>`;
+
+                        column.appendChild(card);
+
+                    }
+
+                });
+
+
+
+                const cards = container.querySelectorAll('.kanban-card');
+
+                const columns = container.querySelectorAll('.kanban-column');
+
+                
+
+                cards.forEach(card => {
+
+                    card.addEventListener('dragstart', (e) => {
+
+                        e.dataTransfer.setData('text/plain', e.target.dataset.id);
+
+                        setTimeout(() => e.target.classList.add('hidden'), 0);
+
+                    });
+
+                    card.addEventListener('dragend', (e) => {
+
+                         e.target.classList.remove('hidden');
+
+                    });
+
+                });
+
+
+
+                columns.forEach(column => {
+
+                    column.addEventListener('dragover', (e) => e.preventDefault());
+
+                    column.addEventListener('drop', (e) => {
+
+                        e.preventDefault();
+
+                        const cardId = e.dataTransfer.getData('text/plain');
+
+                        const newStatus = column.dataset.status;
+
+                        
+
+                        const cardData = appData[activeTab].roadmap.find(item => item.id === cardId);
+
+                        if (cardData && cardData.status !== newStatus) {
+
+                            cardData.status = newStatus;
+
+                            saveDataToLocalStorage();
+
+                            render();
+
+                        }
+
+                    });
+
+                });
+
+            }
+
+
+
+            function createCell(sectionKey, header, rowData, rowIndex) {
+
+                const cellKey = header.toLowerCase().replace(/\s/g, '').replace('%', '');
+
+                const value = rowData[cellKey] || '';
+
+                let content;
+
+
+
+                if (sectionKey === 'kpis' && header === 'Progress') {
+
+                    const metricName = (rowData.metric || '').toLowerCase();
+
+                    const lowerIsBetter = metricName.includes('cost') || metricName.includes('time') || metricName.includes('churn');
+
+                    let current = parseFloat(rowData.current) || 0;
+
+                    let target = parseFloat(rowData.target) || 0;
+
+                    let percentage = 0;
+
+                    if(target > 0){
+
+                        if(lowerIsBetter){
+
+                             percentage = (current <= target) ? 100 : (target / current) * 100;
+
+                        } else {
+
+                             percentage = (current / target) * 100;
+
+                        }
+
+                    }
+
+                    
+
+                    content = `
+
+                        <div class="flex items-center gap-2">
+
+                            <div class="w-full progress-bar-bg"><div class="progress-bar" style="width: ${Math.min(100, percentage)}%;"></div></div>
+
+                            <span class="font-mono text-xs">${Math.round(percentage)}%</span>
+
+                        </div>
+
+                        <div class="text-xs text-slate-500 editable-sub-cell" contenteditable="true" data-section="${sectionKey}" data-row="${rowIndex}" data-key="current">Current: ${rowData.current || 0}</div>
+
+                        <div class="text-xs text-slate-500 editable-sub-cell" contenteditable="true" data-section="${sectionKey}" data-row="${rowIndex}" data-key="target">Target: ${rowData.target || 0}</div>
+
+                    `;
+
+                     return `<td class="px-6 py-4 align-top">${content}</td>`;
+
+                } else if ((['roadmap', 'legal', 'gtm', 'feedback', 'actionItems', 'hiring', 'salesPipeline'].includes(sectionKey)) && (header === 'Status' || header === 'Stage')) {
+
+                    const lowerCaseValue = value.toLowerCase();
+
+                    let colorClass = 'bg-slate-100 text-slate-600';
+
+                    if (['completed', 'done', 'closed-won'].includes(lowerCaseValue)) colorClass = 'bg-emerald-100 text-emerald-800';
+
+                    if (['in progress', 'interviewing', 'sourcing', 'qualified', 'proposal sent'].includes(lowerCaseValue)) colorClass = 'bg-amber-100 text-amber-800';
+
+                    if (['at risk', 'stuck', 'backlog', 'closed-lost'].includes(lowerCaseValue)) colorClass = 'bg-rose-100 text-rose-800';
+
+                    content = `<div class="cell-content"><span class="${colorClass} status-badge">${value}</span></div>`;
+
+                } else if ((sectionKey === 'feedback' || sectionKey === 'risks' || sectionKey === 'techDebt') && (header === 'Priority' || header === 'Impact' || header === 'Probability') ) {
+
+                     const lowerCaseValue = value.toLowerCase();
+
+                    let colorClass = 'bg-slate-100 text-slate-600';
+
+                    if (lowerCaseValue === 'high') colorClass = 'bg-rose-100 text-rose-800';
+
+                    if (lowerCaseValue === 'medium') colorClass = 'bg-amber-100 text-amber-800';
+
+                    if (lowerCaseValue === 'low') colorClass = 'bg-sky-100 text-sky-800';
+
+                    content = `<div class="cell-content"><span class="${colorClass} status-badge">${value}</span></div>`;
+
+                }
+
+                else {
+
+                    content = `<div class="cell-content">${value}</div>`;
+
+                }
+
+                
+
+                const cell = `<td class="px-6 py-4 align-top">${content}</td>`;
+
+                const div = document.createElement('div');
+
+                div.innerHTML = cell;
+
+                if(header !== 'Progress') {
+
+                   div.querySelector('.cell-content').setAttribute('contenteditable', 'true');
+
+                   div.querySelector('.cell-content').dataset.section = sectionKey;
+
+                   div.querySelector('.cell-content').dataset.row = rowIndex;
+
+                   div.querySelector('.cell-content').dataset.key = cellKey;
+
+                }
+
+                return div.innerHTML;
+
+            }
+
+            
+
+            function createDeleteCell(key, rowIndex) {
+
+                return `<td class="px-6 py-4 text-center align-top">
+
+                            <button class="text-slate-400 hover:text-red-500 delete-row" data-section="${key}" data-row="${rowIndex}">
+
+                                <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+
+                            </button>
+
+                        </td>`;
+
+            }
+
+
+
+            // --- Event Handlers ---
+
+            function handleAddRow(sectionKey, newRowData) {
+
+                const newRow = { ...newRowData, id: `${sectionKey.slice(0,1)}${Date.now()}` };
+
+                if(!appData[activeTab][sectionKey]) appData[activeTab][sectionKey] = [];
+
+                appData[activeTab][sectionKey].push(newRow);
+
+                saveDataToLocalStorage();
+
+                render();
+
+            }
+
+
+
+            function handleCellEdit(e) {
+
+                const { section, row, key } = e.target.dataset;
+
+                let value = e.target.textContent;
+
+
+
+                if(e.target.classList.contains('editable-sub-cell')) {
+
+                    value = value.split(': ')[1] || '';
+
+                }
+
+
+
+                if (appData[activeTab][section][row] && appData[activeTab][section][row][key] != value) {
+
+                    appData[activeTab][section][row][key] = value;
+
+                    saveDataToLocalStorage();
+
+                    if(['kpis', 'budget', 'roadmap', 'gtm', 'actionItems', 'feedback', 'risks', 'financials'].includes(section)) render(); 
+
+                }
+
+            }
+
+            
+
+            function showModal(config) {
+
+                modalTitle.textContent = config.title;
+
+                modalMessage.textContent = config.message;
+
+                if(config.showInput) {
+
+                    modalInputContainer.classList.remove('hidden');
+
+                    modalInput.value = '';
+
+                    modalInput.placeholder = config.placeholder || '';
+
+                } else {
+
+                    modalInputContainer.classList.add('hidden');
+
+                }
+
+                modalAction = config.action;
+
+                confirmModal.classList.remove('hidden');
+
+                setTimeout(() => confirmModal.classList.remove('opacity-0'), 10);
+
+            }
+
+
+
+            function showDeleteModal(e) {
+
+                const button = e.target.closest('.delete-row');
+
+                if (!button) return;
+
+                rowToDelete = button.dataset;
+
+                showModal({
+
+                    title: 'Confirm Deletion',
+
+                    message: 'Are you sure you want to delete this row? This action cannot be undone.',
+
+                    showInput: false,
+
+                    action: 'delete_row'
+
+                });
+
+            }
+
+            
+
+            document.getElementById('add-startup-btn').onclick = () => {
+
+                showModal({
+
+                    title: 'Add New Startup',
+
+                    message: 'Enter a name for your new startup venture.',
+
+                    showInput: true,
+
+                    placeholder: 'e.g., QuantumLeap AI',
+
+                    action: 'add_startup'
+
+                });
+
+            };
+
+            
+
+            removeStartupBtn.onclick = () => {
+
+                if (activeTab !== 'Portfolio Overview') {
+
+                     showModal({
+
+                        title: `Delete Startup`,
+
+                        message: `Are you sure you want to permanently delete "${activeTab}"? This action cannot be undone.`,
+
+                        showInput: false,
+
+                        action: 'delete_startup'
+
+                    });
+
+                }
+
+            };
+
+
+
+            modalCancel.onclick = () => {
+
+                confirmModal.classList.add('opacity-0');
+
+                setTimeout(() => confirmModal.classList.add('hidden'), 200);
+
+                rowToDelete = null;
+
+                modalAction = null;
+
+            };
+
+
+
+            modalConfirm.onclick = () => {
+
+                if (modalAction === 'delete_row' && rowToDelete) {
+
+                    const { section, row } = rowToDelete;
+
+                    const rowIndex = parseInt(row, 10);
+
+                    appData[activeTab][section].splice(rowIndex, 1);
+
+                } else if (modalAction === 'add_startup') {
+
+                    const newName = modalInput.value.trim();
+
+                    if (newName && !appData[newName]) {
+
+                        appData[newName] = JSON.parse(JSON.stringify(blankStartup));
+
+                        activeTab = newName;
+
+                    } else if(newName) {
+
+                        alert('A startup with this name already exists.');
+
+                        return; 
+
+                    }
+
+                } else if (modalAction === 'delete_startup') {
+
+                    if (activeTab !== 'Portfolio Overview') {
+
+                        delete appData[activeTab];
+
+                        activeTab = 'Portfolio Overview';
+
+                    }
+
+                }
+
+                saveDataToLocalStorage();
+
+                render();
+
+                modalCancel.onclick();
+
+            };
+
+
+
+            // --- Initial Load ---
+
+            loadDataFromLocalStorage();
+
+            render();
+
+        });
+
+    </script>
+
+</body>
+
+</html>
 
